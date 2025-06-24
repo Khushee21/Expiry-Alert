@@ -1,20 +1,23 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './screen/HomeScreen';
+import AddItemScreen from './screen/AddItemScreen';
+import store from './store/store';
+import { Provider } from 'react-redux';
+import Toast from 'react-native-toast-message';
 
+const Stack = createNativeStackNavigator();
 export default function App() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ color: 'purple', fontSize: 18 }}>hey this is khushi Rathore</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+    < Provider store={store}>
+      <NavigationContainer>  {/**ye wrapper cmnt is reponsible for app ke navigation , it manages the state of navigation*/}
+        <Stack.Navigator>
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="AddItem" component={AddItemScreen} />
+        </Stack.Navigator>
+        <Toast />
+      </NavigationContainer>
+    </Provider>
+  )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
