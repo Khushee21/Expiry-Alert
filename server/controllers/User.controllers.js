@@ -39,7 +39,7 @@ export const VerifyOtpHandler = async (req, res) => {
 export const signup = async (req, res) => {
     try {
         const { email, password, code } = req.body;
-        console.log(email, password, code);
+        //console.log(email, password, code);
         if (!email || !password || !code) {
             return sendError(res, "Please provide Email, Password, and OTP code", 401);
         }
@@ -80,9 +80,10 @@ export const signup = async (req, res) => {
     }
 };
 
+//4.login
 export const login = async (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password);
+    //console.log(email, password);
     try {
         if (!email || !password)
             return sendError(res, "Please provide Email and Password", 401);
@@ -90,20 +91,20 @@ export const login = async (req, res) => {
         const user = await UserModel.findOne({ email });
         if (!user)
             return sendError(res, "Invalid credentials. Email not found", 404);
-        console.log(user);
+        //console.log(user);
         const match = await bcrypt.compare(password, user.password);
         if (!match)
             return sendError(res, "Invalid credentials. Wrong password", 401);
-        console.log(match);
+        //console.log(match);
         // if (user.activeSession)
         //     return sendError(res, "Already logged in on another device", 409);
 
         const payload = { userId: user._id.toString(), email: user.email };
-        console.log(payload);
+        // console.log(payload);
         const accessToken = signAccessToken(payload);
         const refreshToken = signRefreshToken(payload);
-        console.log(accessToken);
-        console.log(refreshToken);
+        //console.log(accessToken);
+        // console.log(refreshToken);
         user.refreshTokens = [refreshToken];
         user.activeSession = accessToken;
         await user.save();
@@ -127,7 +128,73 @@ export const login = async (req, res) => {
     }
 };
 
+//5.refresh token
+export const refreshTokenHandler = async (req, res) => {
+    const { refreshTokens } = req.body;
+    try {
+        if (!refreshTokens) sendError(res, "Refresh token is not avaible", 401);
+        const payload = verifyRefreshToken(refreshTokens);
+        //find user and check token
+        const user = await UserModel.findById(payload.userId);
+        if (!user || !user.refreshTokens.includes(refreshTokens)) {
+            return sendError(res, "Invalid refresh token", 403);
+        }
+
+        //optionally rotate tokens for security and safety
+        user.refreshTokens = user.refreshTokens.filter((rt) => rt !== refreshTokens);
+        const newrefreshToken = signRefreshToken({    //har login pr new refrence token
+            userId: payload.userId,
+            email: payload.email,
+        });
+        user.refreshToken.push(newrefreshToken);
+        await user.save();
+
+        const newAccessToken = signAccessToken({
+            userId: payload.userId,
+            email: payload.email,
+        });
+        const Cleaneduser = user.toObject();
+        delete (Cleaneduser).password;
+        delete (Cleaneduser).refreshToken;
+        return sendSuccess(res, {
+            accessToken: newAccessToken,
+            refreshToken: newrefreshToken,
+            user: {
+                _id: Cleaneduser._id,
+                email: Cleaneduser.email,
+            },
+        },
+            "Token refreshed",
+            200
+        );
+    } catch (err) {
+        return sendError(res, "Could not refresh token", 403, err);
+    }
+};
+
 //5.reset password
-//5.Refresh token
+
 //6.log out
+export const logout = async (req, res) => {
+    const { refreshTokens } = req.body;
+    try {
+        if (!refreshTokens) return sendError(res, "Refresh token required", 400);
+        let payload;
+        try {
+            payload = verifyRefreshToken(refreshTokens);
+        } catch {
+            return sendError(res, "Invalid refresh token", 403);
+        }
+        const user = await UserModel.findById(payload.userId);
+        if (!user) return sendError(res, "Invalid refresh token", 403);
+        user.refreshToken = [],
+            user.activeSession = null;
+        await user.save();
+        return sendSuccess(res, null, "Logged out successfully", 200);
+    } catch (err) {
+        return sendError(res, "Logout failed", 500, err);
+    }
+};
+
+
 

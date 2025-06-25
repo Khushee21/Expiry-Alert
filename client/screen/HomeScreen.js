@@ -76,7 +76,7 @@ export default function HomeScreen({ navigation }) {
     };
 
     const handleSignIn = async () => {
-        console.log(email);
+        // console.log(email);
         if (!email || !password) {
             Toast.show({ type: 'error', text1: 'Please enter Email and Password!' });
             return;
