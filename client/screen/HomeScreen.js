@@ -396,3 +396,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
 });
+
+//reset password
+//email verification
