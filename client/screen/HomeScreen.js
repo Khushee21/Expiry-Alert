@@ -19,7 +19,6 @@ import { setUser } from '../store/UserSlice';
 import { BACKEND_URL } from '../env';
 import Toast from 'react-native-toast-message';
 
-
 export default function HomeScreen({ navigation }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [isSignup, setIsSignup] = useState(false);
@@ -32,30 +31,27 @@ export default function HomeScreen({ navigation }) {
     const inputsRef = useRef([]);
     const [otpSent, setOtpSent] = useState(false);
 
-    //handle otp change box wise
     const handleOtpChange = (index, value) => {
         if (!/^\d?$/.test(value)) return;
         const newOtp = [...otpArray];
         newOtp[index] = value;
         setOtpArray(newOtp);
         setOtp(newOtp.join(''));
-        if (value && input < 5) inputsRef.current[index + 1].focus();
+        if (value && index < 5) inputsRef.current[index + 1]?.focus();
     };
 
     const handleBackSpace = (index, e) => {
         if (e.nativeEvent.key === 'Backspace' && !otpArray[index] && index > 0) {
-            inputsRef.current[index + 1].focus();
+            inputsRef.current[index - 1]?.focus();
         }
-    }
-    //handle request otp 
+    };
+
     const requestOtp = async () => {
         if (!email) {
-            Toast.show({
-                type: 'error',
-                text1: 'Please enter Email',
-            });
+            Toast.show({ type: 'error', text1: 'Please enter Email' });
             return;
         }
+        // console.log(email);
         try {
             const res = await fetch(`${BACKEND_URL}/auth/request-otp`, {
                 method: 'POST',
@@ -66,135 +62,106 @@ export default function HomeScreen({ navigation }) {
             if (data.success) {
                 Toast.show({
                     type: 'success',
-                    text1: 'OTP!',
-                    text2: 'Otp has send to youe email 🛒',
+                    text1: 'OTP Sent!',
+                    text2: 'OTP has been sent to your email 📩',
                 });
                 setOtpSent(true);
             } else {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Failed to send OTP!',
-                });
+                Toast.show({ type: 'error', text1: 'Failed to send OTP!' });
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.log(error);
-            Toast.show({
-                type: 'error',
-                text1: 'OTP Request ERROR!',
-            });
+            Toast.show({ type: 'error', text1: 'OTP Request Error' });
         }
-    }
-    //handleAuth
-    //1.handle sign in
+    };
+
     const handleSignIn = async () => {
+        console.log(email);
         if (!email || !password) {
-            Toast.show({
-                type: 'error',
-                text1: 'Please enter EMAIL and PASSWORD!',
-            });
+            Toast.show({ type: 'error', text1: 'Please enter Email and Password!' });
             return;
         }
         try {
-            const response = await fetch(`${BACKEND_URL}/api/signin`, {
+            const response = await fetch(`${BACKEND_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password }),
             });
-
             const data = await response.json();
-            if (data.success) {
-                const { user, accessToken, refreshToken } = data;
-                //store accesstoken + user in redux
+            //console.log("🟩 Login response:", data);
+            if (response.ok && data.success) {
+                if (!refreshToken) {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'error ',
+                    });
+                }
+                const { accessToken, refreshToken, user } = data.data || {};
+                //const { user, accessToken, refreshToken } = data;
+                if (!refreshToken) console.log('referesh tkn')
                 dispatch(setUser({ user, accessToken }));
-                //store refreshToken in local storage 
                 await AsyncStorage.setItem('refreshToken', refreshToken);
-                Toast.show({
-                    type: 'success',
-                    text1: 'Sign IN successfull!',
-                });
+                Toast.show({ type: 'success', text1: 'Sign in successful!' });
                 setModalVisible(false);
-                // store token if needed
             } else {
                 Toast.show({
                     type: 'error',
-                    text1: 'SIGN IN failed!',
+                    text1: 'Sign in failed!',
+                    text2: data?.message || 'Invalid credentials',
                 });
             }
-
         } catch (error) {
-            console.error(error);
+            // console.error("🟥 Sign-in error:", error);
             Toast.show({
                 type: 'error',
-                text1: 'SIGN IN error!',
+                text1: 'Sign in error!',
+                text2: error.message,
             });
         }
-    }
+    };
 
-    //2.handle sign up
+
     const handleSignUp = async () => {
         if (otp.length !== 6) {
-            Toast.show({
-                type: 'error',
-                text1: 'Please enter a valid 6-digit OTP!',
-            });
+            Toast.show({ type: 'error', text1: 'Enter a valid 6-digit OTP!' });
             return;
         }
-
         if (!email || !password || !confirmPass) {
-            Toast.show({
-                type: 'error',
-                text1: 'Please fill all FIELDS!',
-            });
+            Toast.show({ type: 'error', text1: 'Please fill all fields!' });
             return;
         }
         if (password !== confirmPass) {
-            Toast.show({
-                type: 'error',
-                text1: 'PASSWORD do not match!',
-            });
+            Toast.show({ type: 'error', text1: 'Passwords do not match!' });
             return;
         }
         try {
-            const response = await fetch(`${BACKEND_URL}/api/signup`, {
+            const response = await fetch(`${BACKEND_URL}/auth/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, code: otp }),
             });
-            console.log(response);
             const data = await response.json();
             if (data.success) {
-                Toast.show({
-                    type: 'success',
-                    text1: 'Sign UP successfull!!🛒',
-                });
+                Toast.show({ type: 'success', text1: 'Sign up successful!' });
                 setModalVisible(false);
-            }
-            else {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Sign Up failed!',
-                });
+            } else {
+                Toast.show({ type: 'error', text1: 'Sign up failed!' });
             }
             setEmail('');
-            setConfirmPass('');
             setPassword('');
+            setConfirmPass('');
+            setOtp('');
             setOtpArray(['', '', '', '', '', '']);
+            setOtpSent(false);
+        } catch (error) {
+            console.log("Signup error", error);
+            Toast.show({ type: 'error', text1: 'Sign up error!' });
         }
-        catch (error) {
-            console.log("error sign up", error);
-            Toast.show({
-                type: 'error',
-                text1: 'Sign Up error',
-            });
-        }
-    }
+    };
 
     return (
         <ImageBackground
-            source={{
-                uri: 'https://i.pinimg.com/736x/db/8b/52/db8b52840df082f9b3a6dbd9cc886069.jpg',
-            }}
+            source={{ uri: 'https://i.pinimg.com/736x/db/8b/52/db8b52840df082f9b3a6dbd9cc886069.jpg' }}
             style={styles.background}
         >
             <View style={styles.overlay}>
@@ -210,16 +177,8 @@ export default function HomeScreen({ navigation }) {
 
                 <Text style={styles.caption}>Start managing your kitchen smartly 🍅</Text>
 
-                <TouchableOpacity
-                    onPress={() => setModalVisible(true)}
-                    style={styles.buttonWrapper}
-                >
-                    <LinearGradient
-                        colors={['#FF6F61', '#FFD54F']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.button}
-                    >
+                <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.buttonWrapper}>
+                    <LinearGradient colors={['#FF6F61', '#FFD54F']} style={styles.button}>
                         <Text style={styles.buttonText}>Let's Start</Text>
                     </LinearGradient>
                 </TouchableOpacity>
@@ -230,14 +189,12 @@ export default function HomeScreen({ navigation }) {
                         <Text style={{ fontWeight: 'bold', color: '#FFD54F' }}> Sign up</Text>
                     </Text>
                 </TouchableOpacity>
-
             </View>
 
-            {/*Modal for sign in /up*/}
             <Modal
                 visible={modalVisible}
                 animationType='slide'
-                transparent={true}
+                transparent
                 onRequestClose={() => setModalVisible(false)}
             >
                 <KeyboardAvoidingView
@@ -245,9 +202,7 @@ export default function HomeScreen({ navigation }) {
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 >
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>
-                            {isSignup ? "Create Account" : "Welcome Back!"}
-                        </Text>
+                        <Text style={styles.modalTitle}>{isSignup ? "Create Account" : "Welcome Back!"}</Text>
                         <TextInput
                             placeholder='Email'
                             value={email}
@@ -261,7 +216,8 @@ export default function HomeScreen({ navigation }) {
                             onChangeText={setPassword}
                             secureTextEntry
                             style={styles.input}
-                            placeholderTextColor="#999" />
+                            placeholderTextColor="#999"
+                        />
                         {isSignup && (
                             <>
                                 <TextInput
@@ -280,25 +236,26 @@ export default function HomeScreen({ navigation }) {
                                 </TouchableOpacity>
 
                                 {otpSent && (
-                                    <TextInput
-                                        placeholder="Enter OTP"
-                                        value={otp}
-                                        onChangeText={setOtp}
-                                        keyboardType="numeric"
-                                        style={styles.input}
-                                        placeholderTextColor="#999"
-                                        maxLength={6}
-                                    />
+                                    <View style={{ flexDirection: 'row', gap: 5 }}>
+                                        {[...Array(6)].map((_, index) => (
+                                            <TextInput
+                                                key={index}
+                                                ref={(el) => (inputsRef.current[index] = el)}
+                                                value={otpArray[index]}
+                                                onChangeText={(value) => handleOtpChange(index, value)}
+                                                onKeyPress={(e) => handleBackSpace(index, e)}
+                                                keyboardType="numeric"
+                                                style={[styles.input, { width: 35, textAlign: 'center' }]}
+                                                maxLength={1}
+                                            />
+                                        ))}
+                                    </View>
                                 )}
                             </>
                         )}
+
                         <Pressable onPress={isSignup ? handleSignUp : handleSignIn}>
-                            <LinearGradient
-                                colors={['#FF6F61', '#FFD54F']}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 0 }}
-                                style={styles.authButton}
-                            >
+                            <LinearGradient colors={['#FF6F61', '#FFD54F']} style={styles.authButton}>
                                 <Text style={styles.authButtonText}>
                                     {isSignup ? 'SIGN UP' : 'SIGN IN'}
                                 </Text>
@@ -316,11 +273,9 @@ export default function HomeScreen({ navigation }) {
                     </View>
                 </KeyboardAvoidingView>
             </Modal>
-
-        </ImageBackground >
+        </ImageBackground>
     );
 }
-
 const styles = StyleSheet.create({
     background: {
         flex: 1,

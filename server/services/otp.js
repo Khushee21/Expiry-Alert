@@ -1,5 +1,5 @@
-import { OTPModel } from '../models/User.OTPModel'
-import { sendMail } from './email';
+import { OTPModel } from '../models/User.OTPModel.js'
+import { sendMail } from './email.js';
 
 const OTP_LENGTH = 6;
 const EXPIRY_MINUTES = 10;

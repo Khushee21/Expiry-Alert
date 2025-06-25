@@ -1,10 +1,10 @@
-import mongoose from mongoose;
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const uri = process.env.MONGO_URL;
 
-if (!url) {
+if (!uri) {
     console.error('❌ MONGODB_URI not set in .env');
     process.exit(1);
 }

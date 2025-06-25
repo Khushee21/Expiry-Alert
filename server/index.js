@@ -1,15 +1,18 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 dotenv.config();
+import connectDB from "./utils/db.js";
+import UserRoute from "./routes/User.routes.js";
 
 export async function bootstrap() {
-
     const app = express();
     const PORT = process.env.PORT || 8000;
 
-    //CORS SETUP
-    const corsOrigin = process.env.CORS_ORIGIN;
+    await connectDB();
+
+    // CORS setup
+    const corsOrigin = process.env.CORS_ORIGIN || 'http://192.168.9.45:19000';
     app.use(cors({
         origin: corsOrigin,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -17,26 +20,25 @@ export async function bootstrap() {
         credentials: true
     }));
 
-    //BODY PARSERS
+    // Body parsers
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    //ROUTES
+    // Routes
     app.get('/', (req, res) => {
-        res.send('Hello from Expiry alert backend!!!!');
-    })
+        res.send('Hello from Expiry Alert backend!');
+    });
+
+    app.use('/auth', UserRoute);
 
     if (!PORT) {
-        console.log('Port is not loaded from .env');
+        console.log('⚠️ Port is not loaded from .env');
     }
-    //server start listening
+
+    // Start server
     app.listen(PORT, () => {
-        console.log(`Expiry Alery server running on ${PORT}`)
-    })
+        console.log(`✅ Expiry Alert server running on port ${PORT}`);
+    });
 }
 
 bootstrap().catch(console.error);
-
-
-
-

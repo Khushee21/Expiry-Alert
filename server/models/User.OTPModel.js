@@ -1,4 +1,5 @@
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
+const { Schema, model, models } = mongoose;
 
 const OtpSchema = new Schema(
     {
@@ -11,4 +12,4 @@ const OtpSchema = new Schema(
     { timestamps: true }
 );
 
-export const OTPModel = model('OTP', OtpSchema);
+export const OTPModel = models.OTP || model('OTP', OtpSchema);
