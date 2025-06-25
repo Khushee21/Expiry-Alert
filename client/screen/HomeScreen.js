@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginTop: 10,
         marginBottom: 10,
-        alignItems: 'center', // ensure text is centered
+        alignItems: 'center',
         justifyContent: 'center',
     },
 
