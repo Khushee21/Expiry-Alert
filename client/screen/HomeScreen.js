@@ -18,8 +18,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setUser } from '../store/UserSlice';
 import { BACKEND_URL } from '../env';
 import Toast from 'react-native-toast-message';
+import { useNavigation } from '@react-navigation/native';
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [isSignup, setIsSignup] = useState(false);
     const [email, setEmail] = useState('');
@@ -30,6 +31,9 @@ export default function HomeScreen({ navigation }) {
     const [otp, setOtp] = useState('');
     const inputsRef = useRef([]);
     const [otpSent, setOtpSent] = useState(false);
+    const navigation = useNavigation();
+
+
 
     const handleOtpChange = (index, value) => {
         if (!/^\d?$/.test(value)) return;
@@ -102,6 +106,8 @@ export default function HomeScreen({ navigation }) {
                 dispatch(setUser({ user, accessToken }));
                 await AsyncStorage.setItem('refreshToken', refreshToken);
                 Toast.show({ type: 'success', text1: 'Sign in successful!' });
+                navigation.navigate('AddItem');
+
                 setModalVisible(false);
             } else {
                 Toast.show({
