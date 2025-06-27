@@ -8,12 +8,12 @@ import { Provider } from 'react-redux';
 import Toast from 'react-native-toast-message';
 import { Header } from './screen/Header';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator();  //stack like implementation ke liye
 export default function App() {
   return (
     < Provider store={store}>
       <NavigationContainer>  {/**ye wrapper cmnt is reponsible for app ke navigation , it manages the state of navigation*/}
-        <Stack.Navigator>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="AddItem" component={AddItemScreen} />
           <Stack.Screen name="Header" component={Header} />

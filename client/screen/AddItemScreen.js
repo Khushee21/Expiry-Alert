@@ -4,6 +4,7 @@ import { Header } from './Header';
 import ManualForm from '../components/ManualForm';
 import { LinearGradient } from 'expo-linear-gradient';
 import LottieView from 'lottie-react-native';
+import CameraOCR from '../components/CameraOCR';
 
 export default function AddItemScreen() {
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -83,7 +84,7 @@ export default function AddItemScreen() {
 
             <View style={styles.content}>
                 {method === 'manual' && <ManualForm />}
-                {method === 'camera' && <Text>📷 Camera OCR will appear here</Text>}
+                {method === 'camera' && <CameraOCR />}
                 {method === 'scanner' && <Text>🔍 Barcode Scanner will appear here</Text>}
             </View>
         </View>
