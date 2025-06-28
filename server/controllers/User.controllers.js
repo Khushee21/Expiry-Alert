@@ -128,73 +128,75 @@ export const login = async (req, res) => {
     }
 };
 
-//5.refresh token
+//5. Refresh token handler 
 export const refreshTokenHandler = async (req, res) => {
-    const { refreshTokens } = req.body;
+    const { refreshToken } = req.body;
     try {
-        if (!refreshTokens) sendError(res, "Refresh token is not avaible", 401);
-        const payload = verifyRefreshToken(refreshTokens);
-        //find user and check token
+        if (!refreshToken) return sendError(res, "Refresh token not provided", 401);
+
+        const payload = verifyRefreshToken(refreshToken);
         const user = await UserModel.findById(payload.userId);
-        if (!user || !user.refreshTokens.includes(refreshTokens)) {
+
+        if (!user || !user.refreshTokens.includes(refreshToken)) {
             return sendError(res, "Invalid refresh token", 403);
         }
 
-        //optionally rotate tokens for security and safety
-        user.refreshTokens = user.refreshTokens.filter((rt) => rt !== refreshTokens);
-        const newrefreshToken = signRefreshToken({    //har login pr new refrence token
+        // Rotate tokens (optional but recommended)
+        user.refreshTokens = user.refreshTokens.filter(rt => rt !== refreshToken);
+
+        const newRefreshToken = signRefreshToken({
             userId: payload.userId,
             email: payload.email,
         });
-        user.refreshToken.push(newrefreshToken);
+
+        user.refreshTokens.push(newRefreshToken); // Corrected
         await user.save();
 
         const newAccessToken = signAccessToken({
             userId: payload.userId,
             email: payload.email,
         });
-        const Cleaneduser = user.toObject();
-        delete (Cleaneduser).password;
-        delete (Cleaneduser).refreshToken;
+
         return sendSuccess(res, {
             accessToken: newAccessToken,
-            refreshToken: newrefreshToken,
+            refreshToken: newRefreshToken,
             user: {
-                _id: Cleaneduser._id,
-                email: Cleaneduser.email,
+                _id: user._id,
+                email: user.email,
             },
-        },
-            "Token refreshed",
-            200
-        );
+        }, "Token refreshed", 200);
+
     } catch (err) {
         return sendError(res, "Could not refresh token", 403, err);
     }
 };
 
-//5.reset password
-
-//6.log out
+//6. Logout handler 
 export const logout = async (req, res) => {
-    const { refreshTokens } = req.body;
+    const { refreshToken } = req.body;
+
     try {
-        if (!refreshTokens) return sendError(res, "Refresh token required", 400);
+        if (!refreshToken) return sendError(res, "Refresh token required", 400);
+
         let payload;
         try {
-            payload = verifyRefreshToken(refreshTokens);
+            payload = verifyRefreshToken(refreshToken);
         } catch {
             return sendError(res, "Invalid refresh token", 403);
         }
+
         const user = await UserModel.findById(payload.userId);
         if (!user) return sendError(res, "Invalid refresh token", 403);
-        user.refreshToken = [],
-            user.activeSession = null;
+
+        user.refreshTokens = [];  // Fixed
+        user.activeSession = null;
         await user.save();
+
         return sendSuccess(res, null, "Logged out successfully", 200);
+
     } catch (err) {
         return sendError(res, "Logout failed", 500, err);
     }
 };
 
-
-
+//7. reset password using otp

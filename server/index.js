@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
 import connectDB from "./utils/db.js";
-import UserRoute from "./routes/User.routes.js";
+import UserRoute from "./routes/All.routes.js";
 
 export async function bootstrap() {
     const app = express();
