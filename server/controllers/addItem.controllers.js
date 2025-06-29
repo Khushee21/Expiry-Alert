@@ -1,7 +1,8 @@
 import Tesseract from 'tesseract.js';
 import { ProductModel } from '../models/Product.models.js';
-import { sendError } from '../utils/apiResponses.js';
+import { sendError, sendSuccess } from '../utils/apiResponses.js';
 // import { scheduleNotification } from '../utils/scheduleNotification.js';
+import sharp from 'sharp';
 
 const shelfLifeMap = {
     milk: 7,
@@ -13,7 +14,9 @@ const shelfLifeMap = {
     butter: 45,
 };
 
-const AddViaOCR = async (req, res) => {
+
+//1. using Camera OCR
+export const AddViaOCR = async (req, res) => {
     try {
         const image = req.file;
         const userId = req.user?.id?.userId || null;
@@ -90,22 +93,49 @@ const AddViaOCR = async (req, res) => {
 
         console.log("✅ Product Saved:", saveProduct);
 
-        return res.status(200).json({
-            success: true,
-            productName,
-            mfgDate,
-            expDate,
-            imageUrl: saveProduct.imageUrl,
-        });
+        return sendSuccess(res, saveProduct, 200);
 
     } catch (err) {
         console.error("❌ OCR Error:", err);
-        return res.status(500).json({
-            success: false,
-            message: "OCR processing failed",
-            error: err.message,
-        });
+        return sendError(res, "OCR ERROR : " || err, 500);
     }
 };
 
-export default AddViaOCR;
+
+
+//2. manually
+export const AddManually = async (req, res) => {
+    try {
+        const { mfgDate, expDate, productName } = req.body;
+        const userId = req.user?.id?.userId || null;
+
+        if (!productName || !mfgDate || !expDate) {
+            return sendError(res, "Items are missing", 400);
+        }
+
+        if (!userId) {
+            return sendError(res, "User not authenticated", 401);
+        }
+
+        const saveProduct = await ProductModel.create({
+            userId,
+            productName: productName.trim().toLowerCase(),
+            mfgDate: new Date(mfgDate),
+            expDate: new Date(expDate),
+            imageUrl: null, // manual entry has no image
+        });
+
+        if (!saveProduct) {
+            return sendError(res, "Error saving product", 500);
+        }
+
+        return sendSuccess(res, saveProduct, 200);
+
+    } catch (err) {
+        console.log("Manual form adding error:", err);
+        return sendError(res, err.message || "Manual form adding error", 500);
+    }
+};
+
+
+

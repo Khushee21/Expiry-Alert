@@ -12,9 +12,11 @@ import { authenticateUser } from '../middleware/authMiddleware.js'
 import multer from 'multer';
 
 
-
 //ADD PRODUCT
-import AddViaOCR from '../controllers/addItem.controllers.js';
+import {
+    AddViaOCR,
+    AddManually
+} from '../controllers/addItem.controllers.js';
 
 const router = Router();
 
@@ -27,6 +29,7 @@ router.post('/refresh', refreshTokenHandler);
 
 //ADD PRODUCR ROUTES
 router.post('/addItem/ocr', authenticateUser, upload.single('image'), AddViaOCR);
+router.post('/addItem/manual', authenticateUser, AddManually);
 
 
 export default router;
