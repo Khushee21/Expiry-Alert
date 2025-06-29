@@ -18,6 +18,9 @@ import {
     AddManually
 } from '../controllers/addItem.controllers.js';
 
+//NOTIFICATIONS
+import { getNotifications } from '../controllers/notification.controllers.js';
+
 const router = Router();
 
 //AUTH ROUTES
@@ -30,6 +33,10 @@ router.post('/refresh', refreshTokenHandler);
 //ADD PRODUCR ROUTES
 router.post('/addItem/ocr', authenticateUser, upload.single('image'), AddViaOCR);
 router.post('/addItem/manual', authenticateUser, AddManually);
+
+//ADD NOTIFICATION ROUTES
+
+router.get('/notifications', authenticateUser, getNotifications);
 
 
 export default router;

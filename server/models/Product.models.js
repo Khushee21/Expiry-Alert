@@ -28,13 +28,32 @@ const ProductSchema = new Schema({
 
 
 const notificationSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    userId:
+    {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
     message: String,
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-    date: { type: Date, default: Date.now },
-    read: { type: Boolean, default: false }
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product"
+    },
+    date: {
+        type: Date,
+        default: Date.now
+    },
+    read: {
+        type: Boolean,
+        default: false
+    },
+    type: {
+        type: String,
+        enum: ['reminder', 'expired'],
+        default: 'reminder'
+    },
 });
 
-export const Notification = mongoose.model("Notification", notificationSchema);
+export const NotificationModel = mongoose.model("Notification", notificationSchema);
 
 export const ProductModel = mongoose.model("Product", ProductSchema);

@@ -16,6 +16,8 @@ import { useSelector } from 'react-redux';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 import { BACKEND_URL } from '../env';
+import LottieView from 'lottie-react-native';
+
 
 const ManualForm = () => {
     const [productName, setProductName] = useState('');
@@ -23,6 +25,7 @@ const ManualForm = () => {
     const [expDate, setExpDate] = useState(new Date());
     const [showMfgPicker, setShowMfgPicker] = useState(false);
     const [showExpPicker, setShowExpPicker] = useState(false);
+    const [showGift, setShowGift] = useState(false);
     const token = useSelector((state) => state.user.accessToken);
     const navigate = useNavigation();
 
@@ -60,6 +63,10 @@ const ManualForm = () => {
                     text2: 'Your item has been added to the list 📩',
                 });
                 setProductName('');
+                setShowGift(true);
+                setTimeout(() => {
+                    setShowGift(false)
+                }, 5000);
             } else {
                 Toast.show({
                     type: 'error',
@@ -134,6 +141,17 @@ const ManualForm = () => {
                         <Text style={styles.buttonText}>➕ Add Item</Text>
                     </LinearGradient>
                 </TouchableOpacity>
+                {showGift && (
+                    <View style={styles.gifContainer}>
+                        <LottieView
+                            source={require('../assets/1.json')}
+                            autoPlay
+                            loop={false}
+                            style={{ width: 150, height: 150 }}
+                        />
+                    </ View>
+                )
+                }
             </ScrollView>
         </KeyboardAvoidingView>
     );
@@ -192,6 +210,14 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: 'bold',
     },
+    gifContainer: {
+        marginTop: 20,
+        alignItems: 'center',
+    },
+    gifImage: {
+        width: 150,
+        height: 150,
+    }
 });
 
 export default ManualForm;
