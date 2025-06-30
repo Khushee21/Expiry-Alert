@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     View,
     Text,
@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 const Notification = () => {
     const [loading, setLoading] = useState(true);
     const [notifications, setNotifications] = useState([]);
+    const prevCountRef = useRef(0);
     const token = useSelector((state) => state.user.accessToken);
 
     const fetchNotification = async () => {
@@ -26,7 +27,19 @@ const Notification = () => {
             });
             const data = await res.json();
             if (data.success) {
-                setNotifications(data.notifications.reverse());
+
+                const reversed = data.notifications.reverse();
+                //TRigger alert for new notification
+                if (prevCountRef.current && reversed.length > prevCountRef.current) {
+                    Toast.show({
+                        type: 'info',
+                        text1: '🔔 New Notification',
+                        text2: reversed[0].message
+                    });
+                }
+
+                prevCountRef.current = reversed.length;
+                setNotifications(reversed);
             } else {
                 Toast.show({
                     type: 'error',
@@ -45,7 +58,16 @@ const Notification = () => {
     };
 
     useEffect(() => {
+        //FOr initial fetch
         fetchNotification();
+
+        //poll after every 30 sec
+        const interval = setInterval(() => {
+            fetchNotification();
+        }, 3000);
+
+        //unmount
+        return () => clearInterval(interval);
     }, []);
 
     const renderItem = ({ item }) => (

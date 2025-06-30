@@ -17,6 +17,7 @@ import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 import { BACKEND_URL } from '../env';
 import LottieView from 'lottie-react-native';
+import Modal from 'react-native-modal';
 
 
 const ManualForm = () => {
@@ -142,14 +143,17 @@ const ManualForm = () => {
                     </LinearGradient>
                 </TouchableOpacity>
                 {showGift && (
-                    <View style={styles.gifContainer}>
-                        <LottieView
-                            source={require('../assets/1.json')}
-                            autoPlay
-                            loop={false}
-                            style={{ width: 150, height: 150 }}
-                        />
-                    </ View>
+                    <Modal isVisible={showGift} animationIn="zoomIn" animationOut="zoomOut" useNativeDriver>
+                        <View style={styles.gifContainer}>
+                            <LottieView
+                                source={require('../assets/2.json')}
+                                autoPlay
+                                loop={false}
+                                onAnimationFinish={() => setShowGift(false)}
+                                style={{ width: 200, height: 200 }}
+                            />
+                        </View>
+                    </Modal>
                 )
                 }
             </ScrollView>

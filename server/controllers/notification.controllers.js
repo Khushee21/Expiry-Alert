@@ -3,11 +3,11 @@ import { ProductModel, NotificationModel } from '../models/Product.models.js';
 import { sendError, sendSuccess } from '../utils/apiResponses.js';
 
 export const runDailyNotificationJob = () => {
-    cron.schedule('0 9 * * *', async () => {
+    cron.schedule('50 15 * * *', async () => {
         console.log("🔔 Daily expiry and expired check running...");
 
         const today = new Date();
-        const todayDate = new Date(today.toDateString()); // Remove time part
+        const todayDate = new Date(today.toDateString());
 
         try {
             const products = await ProductModel.find();
@@ -18,7 +18,7 @@ export const runDailyNotificationJob = () => {
             }
 
             for (const product of products) {
-                // Skip if already confirmed (optional, if your model supports it)
+                // Skip if already confirmed 
                 if (product.confirmed) continue;
 
                 const expDate = new Date(product.expDate.toDateString());
@@ -47,11 +47,24 @@ export const runDailyNotificationJob = () => {
                         type,
                     });
 
-                    console.log(`✅ Notification (${type}) created for: ${product.productName}`);
+                    //  console.log(`✅ Notification (${type}) created for: ${product.productName}`);
                 } else {
-                    console.log(`ℹ️ Unread notification already exists for: ${product.productName}`);
+                    // console.log(`ℹ️ Unread notification already exists for: ${product.productName}`);
                 }
             }
+
+
+            //delete notiifications whivh is of more than 15 days
+
+            const fifteenDays = new Date();
+            fifteenDays.setDate(fifteenDays.getDate() - 15);
+            const result = await NotificationModel.deleteMany({
+                date: { $lt: fifteenDays }
+            });
+            if (!result) {
+                sendError(res, "Notifications not not deleted", 500);
+            }
+            //  console.log(`🗑️ Deleted ${result.deletedCount} old notifications`);
 
         } catch (err) {
             console.error("❌ Cron job error:", err.message);

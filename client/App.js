@@ -7,6 +7,7 @@ import store from './store/store';
 import { Provider } from 'react-redux';
 import Toast from 'react-native-toast-message';
 import { Header } from './screen/Header';
+import Notification from './screen/NotificationsSreen';
 
 const Stack = createNativeStackNavigator();  //stack like implementation ke liye
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="AddItem" component={AddItemScreen} />
           <Stack.Screen name="Header" component={Header} />
+          <Stack.Screen name="Notifications" component={Notification} />
         </Stack.Navigator>
         <Toast />
       </NavigationContainer>

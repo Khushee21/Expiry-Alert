@@ -40,6 +40,7 @@ export const Header = ({ isDarkMode = false, toggleTheme = () => { } }) => {
 
                         <MenuItem label="Add Items" icon="add-circle-outline" onPress={() => { navigation.navigate('AddItem'); setMenuVisible(false); }} />
                         <MenuItem label="All Items" icon="list-outline" onPress={() => { navigation.navigate('AllItems'); setMenuVisible(false); }} />
+                        <MenuItem label="Notifications" icon="notifications-outline" onPress={() => { navigation.navigate('Notifications'); setMenuVisible(false); }} />
                         <MenuItem label="Profile" icon="person-outline" onPress={() => { navigation.navigate('Profile'); setMenuVisible(false); }} />
                         <MenuItem label="About" icon="information-circle-outline" onPress={() => { navigation.navigate('About'); setMenuVisible(false); }} />
 
