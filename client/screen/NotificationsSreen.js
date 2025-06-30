@@ -5,7 +5,8 @@ import {
     FlatList,
     StyleSheet,
     ActivityIndicator,
-    SafeAreaView
+    SafeAreaView,
+    useColorScheme,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { BACKEND_URL } from '../env';
@@ -17,6 +18,8 @@ const Notification = () => {
     const [notifications, setNotifications] = useState([]);
     const prevCountRef = useRef(0);
     const token = useSelector((state) => state.user.accessToken);
+    const theme = useColorScheme(); // 'dark' or 'light'
+    const isDark = theme === 'dark';
 
     const fetchNotification = async () => {
         try {
@@ -27,9 +30,7 @@ const Notification = () => {
             });
             const data = await res.json();
             if (data.success) {
-
                 const reversed = data.notifications.reverse();
-                //TRigger alert for new notification
                 if (prevCountRef.current && reversed.length > prevCountRef.current) {
                     Toast.show({
                         type: 'info',
@@ -37,7 +38,6 @@ const Notification = () => {
                         text2: reversed[0].message
                     });
                 }
-
                 prevCountRef.current = reversed.length;
                 setNotifications(reversed);
             } else {
@@ -58,20 +58,17 @@ const Notification = () => {
     };
 
     useEffect(() => {
-        //FOr initial fetch
         fetchNotification();
-
-        //poll after every 30 sec
-        const interval = setInterval(() => {
-            fetchNotification();
-        }, 3000);
-
-        //unmount
+        const interval = setInterval(fetchNotification, 3000);
         return () => clearInterval(interval);
     }, []);
 
     const renderItem = ({ item }) => (
-        <View style={[styles.card, item.type === 'expired' ? styles.expired : styles.reminder]}>
+        <View style={[
+            styles.card,
+            item.type === 'expired' ? styles.expired : styles.reminder,
+            isDark && styles.cardDark
+        ]}>
             <Ionicons
                 name={item.type === 'expired' ? "alert-circle" : "time-outline"}
                 size={20}
@@ -79,19 +76,27 @@ const Notification = () => {
                 style={{ marginRight: 10 }}
             />
             <View>
-                <Text style={styles.message}>{item.message}</Text>
-                <Text style={styles.date}>{new Date(item.date).toDateString()}</Text>
+                <Text style={[styles.message, isDark && styles.textLight]}>
+                    {item.message}
+                </Text>
+                <Text style={[styles.date, isDark && styles.textLight]}>
+                    {new Date(item.date).toDateString()}
+                </Text>
             </View>
         </View>
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.heading}>🔔 Notifications</Text>
+        <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+            <Text style={[styles.heading, isDark && styles.headingDark]}>
+                🔔 Notifications
+            </Text>
             {loading ? (
                 <ActivityIndicator size="large" color="#FF6F61" style={{ marginTop: 20 }} />
             ) : notifications.length === 0 ? (
-                <Text style={styles.noData}>No notifications yet!</Text>
+                <Text style={[styles.noData, isDark && styles.textLight]}>
+                    No notifications yet!
+                </Text>
             ) : (
                 <FlatList
                     data={notifications}
@@ -110,11 +115,17 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         padding: 16,
     },
+    containerDark: {
+        backgroundColor: "#121212",
+    },
     heading: {
         fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 16,
         color: '#FF6F61',
+    },
+    headingDark: {
+        color: '#FFD54F',
     },
     card: {
         flexDirection: 'row',
@@ -128,6 +139,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+    },
+    cardDark: {
+        backgroundColor: '#1f1f1f',
     },
     expired: {
         borderLeftWidth: 5,
@@ -145,6 +159,9 @@ const styles = StyleSheet.create({
     date: {
         fontSize: 12,
         color: '#777',
+    },
+    textLight: {
+        color: '#eee',
     },
     noData: {
         textAlign: 'center',

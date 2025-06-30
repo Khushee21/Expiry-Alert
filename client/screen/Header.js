@@ -33,19 +33,44 @@ export const Header = ({ isDarkMode = false, toggleTheme = () => { } }) => {
 
             <Modal visible={menuVisible} animationType="slide" transparent>
                 <View style={styles.modalContainer}>
-                    <View style={styles.menu}>
+                    <View style={[styles.menu, isDarkMode && styles.menuDark]}>
                         <TouchableOpacity style={styles.closeBtn} onPress={() => setMenuVisible(false)}>
                             <Icon name="close-circle-outline" size={28} color="#FF6F61" />
                         </TouchableOpacity>
 
-                        <MenuItem label="Add Items" icon="add-circle-outline" onPress={() => { navigation.navigate('AddItem'); setMenuVisible(false); }} />
-                        <MenuItem label="All Items" icon="list-outline" onPress={() => { navigation.navigate('AllItems'); setMenuVisible(false); }} />
-                        <MenuItem label="Notifications" icon="notifications-outline" onPress={() => { navigation.navigate('Notifications'); setMenuVisible(false); }} />
-                        <MenuItem label="Profile" icon="person-outline" onPress={() => { navigation.navigate('Profile'); setMenuVisible(false); }} />
-                        <MenuItem label="About" icon="information-circle-outline" onPress={() => { navigation.navigate('About'); setMenuVisible(false); }} />
+                        <MenuItem
+                            label="Add Items"
+                            icon="add-circle-outline"
+                            onPress={() => { navigation.navigate('AddItem'); setMenuVisible(false); }}
+                            isDarkMode={isDarkMode}
+                        />
+                        <MenuItem
+                            label="All Items"
+                            icon="list-outline"
+                            onPress={() => { navigation.navigate('AllItems'); setMenuVisible(false); }}
+                            isDarkMode={isDarkMode}
+                        />
+                        <MenuItem
+                            label="Notifications"
+                            icon="notifications-outline"
+                            onPress={() => { navigation.navigate('Notifications'); setMenuVisible(false); }}
+                            isDarkMode={isDarkMode}
+                        />
+                        <MenuItem
+                            label="Profile"
+                            icon="person-outline"
+                            onPress={() => { navigation.navigate('Profile'); setMenuVisible(false); }}
+                            isDarkMode={isDarkMode}
+                        />
+                        <MenuItem
+                            label="About"
+                            icon="information-circle-outline"
+                            onPress={() => { navigation.navigate('About'); setMenuVisible(false); }}
+                            isDarkMode={isDarkMode}
+                        />
 
                         <View style={styles.toggleRow}>
-                            <Text style={styles.menuLabel}>Dark Mode</Text>
+                            <Text style={[styles.menuLabel, isDarkMode && styles.textLight]}>Dark Mode</Text>
                             <Switch value={isDarkMode} onValueChange={toggleTheme} />
                         </View>
 
@@ -59,10 +84,10 @@ export const Header = ({ isDarkMode = false, toggleTheme = () => { } }) => {
     );
 };
 
-const MenuItem = ({ label, icon, onPress }) => (
+const MenuItem = ({ label, icon, onPress, isDarkMode }) => (
     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
         <Icon name={icon} size={20} color="#FF6F61" />
-        <Text style={styles.menuLabel}>{label}</Text>
+        <Text style={[styles.menuLabel, isDarkMode && styles.textLight]}>{label}</Text>
     </TouchableOpacity>
 );
 
@@ -95,6 +120,9 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
     },
+    menuDark: {
+        backgroundColor: '#1e1e1e',
+    },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -105,6 +133,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
         fontWeight: '500',
+    },
+    textLight: {
+        color: '#fefefe',
     },
     closeBtn: {
         alignSelf: 'flex-end',

@@ -6,6 +6,7 @@ import {
     StyleSheet,
     ActivityIndicator,
     SafeAreaView,
+    Switch,
 } from "react-native";
 import { BACKEND_URL } from "../env";
 import { useSelector } from "react-redux";
@@ -16,6 +17,7 @@ const AllItems = () => {
     const token = useSelector((state) => state.user.accessToken);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isDarkMode, setIsDarkMode] = useState(false);
 
     useEffect(() => {
         const getAllProducts = async () => {
@@ -54,7 +56,11 @@ const AllItems = () => {
         const isExpired = expDate < today;
 
         return (
-            <View style={[styles.card, isExpired ? styles.expired : styles.valid]}>
+            <View style={[
+                styles.card,
+                isExpired ? styles.expired : styles.valid,
+                isDarkMode && styles.cardDark
+            ]}>
                 <Ionicons
                     name={isExpired ? "alert-circle" : "leaf-outline"}
                     size={24}
@@ -62,10 +68,16 @@ const AllItems = () => {
                     style={styles.icon}
                 />
                 <View style={styles.cardContent}>
-                    <Text style={styles.productName}>{item.productName}</Text>
-                    <Text style={styles.dateText}>📅 MFG: {mfgDate.toDateString()}</Text>
-                    <Text style={styles.dateText}>⏳ EXP: {expDate.toDateString()}</Text>
-                    <Text style={styles.statusText}>
+                    <Text style={[styles.productName, isDarkMode && styles.textWhite]}>
+                        {item.productName}
+                    </Text>
+                    <Text style={[styles.dateText, isDarkMode && styles.textGray]}>
+                        📅 MFG: {mfgDate.toDateString()}
+                    </Text>
+                    <Text style={[styles.dateText, isDarkMode && styles.textGray]}>
+                        ⏳ EXP: {expDate.toDateString()}
+                    </Text>
+                    <Text style={[styles.statusText, isDarkMode && styles.textGray]}>
                         Status: {isExpired ? "Expired ❌" : "Valid ✅"}
                     </Text>
                 </View>
@@ -74,12 +86,21 @@ const AllItems = () => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.heading}>📦 All Your Products</Text>
+        <SafeAreaView style={[styles.container, isDarkMode && styles.darkContainer]}>
+            <View style={styles.headerRow}>
+                <Text style={[styles.heading, isDarkMode && styles.textWhite]}>
+                    📦 All Your Products
+                </Text>
+                <Switch
+                    value={isDarkMode}
+                    onValueChange={() => setIsDarkMode(!isDarkMode)}
+                />
+            </View>
+
             {loading ? (
                 <ActivityIndicator size="large" color="#FF6F61" style={{ marginTop: 20 }} />
             ) : items.length === 0 ? (
-                <Text style={styles.noData}>No products found!</Text>
+                <Text style={[styles.noData, isDarkMode && styles.textGray]}>No products found!</Text>
             ) : (
                 <FlatList
                     data={items}
@@ -98,12 +119,19 @@ const styles = StyleSheet.create({
         backgroundColor: "#fefefe",
         padding: 16,
     },
+    darkContainer: {
+        backgroundColor: "#121212",
+    },
+    headerRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+    },
     heading: {
         fontSize: 22,
         fontWeight: "bold",
-        marginBottom: 16,
         color: "#FF6F61",
-        textAlign: "center",
     },
     card: {
         flexDirection: "row",
@@ -116,6 +144,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 5,
+    },
+    cardDark: {
+        backgroundColor: "#1e1e1e",
     },
     cardContent: {
         flex: 1,
@@ -152,6 +183,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#777",
         marginTop: 40,
+    },
+    textWhite: {
+        color: "#fff",
+    },
+    textGray: {
+        color: "#ccc",
     },
 });
 
