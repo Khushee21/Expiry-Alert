@@ -138,4 +138,24 @@ export const AddManually = async (req, res) => {
 };
 
 
+//get items
+export const getAllProducts = async (req, res) => {
+    try {
+        const userId = req.user?.id?.userId;
 
+        if (!userId) {
+            return sendError(res, {}, "User not authenticated", 400);
+        }
+
+        const items = await ProductModel.find({ userId });
+
+        if (items.length === 0) {
+            return sendSuccess(res, [], "No items found", 200);
+        }
+
+        return sendSuccess(res, items, "Items fetched successfully", 200);
+    } catch (err) {
+        console.log("Error Fetching Items:", err);
+        return sendError(res, {}, "Error Fetching Items", 500);
+    }
+};

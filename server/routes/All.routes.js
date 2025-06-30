@@ -15,7 +15,8 @@ import multer from 'multer';
 //ADD PRODUCT
 import {
     AddViaOCR,
-    AddManually
+    AddManually,
+    getAllProducts
 } from '../controllers/addItem.controllers.js';
 
 //NOTIFICATIONS
@@ -33,6 +34,7 @@ router.post('/refresh', refreshTokenHandler);
 //ADD PRODUCR ROUTES
 router.post('/addItem/ocr', authenticateUser, upload.single('image'), AddViaOCR);
 router.post('/addItem/manual', authenticateUser, AddManually);
+router.get('/allItems', authenticateUser, getAllProducts);
 
 //ADD NOTIFICATION ROUTES
 
