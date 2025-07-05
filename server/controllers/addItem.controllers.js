@@ -35,8 +35,10 @@ export const AddViaOCR = async (req, res) => {
         // OCR processing
         const result = await Tesseract.recognize(normalizedPath, 'eng', {
             logger: m => console.log("📄 OCR Progress:", m),
-            tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:/.- ',
-            preserve_interword_spaces: 1,
+            config: {
+                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:/.- ',
+                preserve_interword_spaces: 1,
+            }
         });
 
         const text = result.data.text;
